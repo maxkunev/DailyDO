@@ -4,11 +4,11 @@ from django.db import models
 
 from users.models import TelegramUser
 
-class Tasks(models.Model):
+class Task(models.Model):
     user = models.ForeignKey(TelegramUser, on_delete=models.CASCADE, related_name="tasks")
-    text = models.TextField(max_length=1000)
+    text = models.TextField()
     date = models.DateField()
     is_done = models.BooleanField(default=False)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     
