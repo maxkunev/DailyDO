@@ -13,6 +13,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 from pathlib import Path
 import os
 import dj_database_url
+from django.core.exceptions import ImproperlyConfigured
+import warnings
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,10 +27,22 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY')
 
 if not SECRET_KEY:
-    raise ValueError('Error! SECRET_KEY IS EMPTY!')
+    raise ImproperlyConfigured('Error! SECRET_KEY IS EMPTY!')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'False') == 'True'
+DEBUG = os.getenv('DEBUG', 'False') == 'True' 
+# if the condition inside True == True = True, if False, other info or doesn`t set False/bla-bla == True = False`
+
+ADMIN_URL = os.getenv('ADMIN_URL', 'admin/') 
+# Bc, we have 'admin/' link as default, we have to make sure that it will have some safe condition
+
+if ADMIN_URL == 'admin/': 
+    warnings.warn(
+        "Warning! You are using the default ADMIN_URL.\n"
+        "This could lead to security issues.\n" 
+        "Do not make this project publicly accessible using the default ADMIN_URL.", 
+        UserWarning
+    ) # Better use django checks, mb will rewrite in the future.
 
 ALLOWED_HOSTS = []
 
@@ -94,7 +108,7 @@ DATABASES = {
     }
 }
 
-db_from_env = os.getenv('DATABASE_URL')
+db_from_env = os.getenv('DATABASE_URL') # setting for deploy
 
 if db_from_env:
      DATABASES['default'] = dj_database_url.parse(db_from_env)
