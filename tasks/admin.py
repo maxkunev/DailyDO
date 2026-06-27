@@ -1,10 +1,10 @@
 from django.contrib import admin
-from .models import Tasks
+from .models import Task
 # Register your models here.
 
-class TasksAdmin(admin.ModelAdmin):
+class TaskAdmin(admin.ModelAdmin):
     
     list_display = ("id", "user", "created_at")
     search_fields = ["id"]
 
-admin.site.register(Tasks, TasksAdmin)
+admin.site.register(Task, TaskAdmin)
