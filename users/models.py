@@ -8,3 +8,6 @@ class TelegramUser(models.Model):
     first_name = models.CharField(blank=True, null=True, max_length=50)
     created_at = models.DateTimeField(auto_now_add=True, blank=False, null=False)
     
+    @property
+    def is_authenticated(self):
+        return True
