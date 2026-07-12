@@ -13,7 +13,14 @@ def create_user_or_update(id, username, first_name):
             'first_name':first_name
             }
         )
-    
+
+@sync_to_async
+def get_or_update(id, language):
+    user = TelegramUser.objects.get(id=id)
+    user.language=language
+    user.save()
+    return user
+
 @sync_to_async
 def paste_tasks(tasks, user_id):
     try:
@@ -45,3 +52,17 @@ def parse_tasks(json_list):
         return None
     
     return array
+
+@sync_to_async
+def get_user_language(user_id, language='en'):
+    
+    try:
+        user = TelegramUser.objects.get(id=user_id)
+    except:
+        return language
+    
+    if user and user.language:
+        return user.language
+    else:
+        return language
+    

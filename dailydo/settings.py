@@ -15,6 +15,7 @@ import os
 import dj_database_url
 from django.core.exceptions import ImproperlyConfigured
 import warnings
+from datetime import timedelta
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -44,7 +45,7 @@ if ADMIN_URL == 'admin/':
         UserWarning
     ) # Better use django checks, mb will rewrite in the future.
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(',')
 
 
 # Application definition
@@ -57,6 +58,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'corsheaders',
     #myApp
     'api',
     'tasks',
@@ -65,6 +67,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -154,3 +157,23 @@ REST_FRAMEWORK = {
         'users.authentication.JWTAuthenticationForCustomModel',
     ),
 }
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': False,
+
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+env_csrf = os.environ.get('CSRF_TRUSTED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+
+CSRF_TRUSTED_ORIGINS = env_csrf.split(',')
+
+env_cors = os.environ.get('CORS_ALLOWED_ORIGINS', 'http://localhost:5173,http://127.0.0.1:5173')
+
+CORS_ALLOWED_ORIGINS = env_cors.split(',')
+CORS_ALLOW_CREDENTIALS = True

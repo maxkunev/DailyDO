@@ -1,6 +1,6 @@
 import os
 from cryptography.hazmat.primitives import hashes, hmac
-
+from urllib.parse import unquote
 
 def validate_telegram_init_data(init_data: str) -> dict | None:
     
@@ -13,7 +13,7 @@ def validate_telegram_init_data(init_data: str) -> dict | None:
     hash = ''
     for data in unvalidated_data:
         if not data.startswith('hash='):
-            validated_data.append(data)
+            validated_data.append(unquote(data))
         else:
             hash+=str(data).split('=')[1]
             
