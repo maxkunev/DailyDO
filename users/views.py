@@ -10,40 +10,54 @@ from users.utils import validate_telegram_init_data
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import permission_classes, api_view
+from django.views.decorators.csrf import csrf_exempt
 
 from users.models import TelegramUser
 
+@csrf_exempt
 @require_POST #using bare django for better understanding of api, easy to use api_view["POST"] with request.data
 def user_jwt_generator(request):
     
-    data = json.loads(request.body)
-    init_data = data.get('init_data')
-    
-    validated_data = validate_telegram_init_data(init_data)
-    
-    if not validated_data:
-        return JsonResponse({'status': 'Error'})
-    
-    user_info = validated_data.get('user')
-    
     try:
-        user, status = TelegramUser.objects.update_or_create(
-        id=user_info.get('id'), 
-        defaults={
-            'username':user_info.get('username'), 
-            'first_name':user_info.get('first_name')
-            }
-        )
+        data = json.loads(request.body)
+        init_data = data.get('initData')
+        
+        if not init_data:
+                return JsonResponse({'error': 'no initData provided'}, status=400)
+        
+        validated_data = validate_telegram_init_data(init_data)
+        
+        if not validated_data:
+            return JsonResponse({'status': 'invalid signature'}, status=401)
+        
+        user_info_str = validated_data.get('user', {})
+        user_info = json.loads(user_info_str)
+        
+        try:
+            user, status = TelegramUser.objects.update_or_create(
+            id=user_info.get('id'), 
+            defaults={
+                'username':user_info.get('username'), 
+                'first_name':user_info.get('first_name')
+                }
+            )
+        except Exception as e:
+            import traceback
+            print('FULL ERROR:')
+            traceback.print_exc()
+            return JsonResponse({'status': 'Error', 'message': str(e)}, status=500)
+        
+        refresh = RefreshToken.for_user(user)
+        
+        return JsonResponse({
+                    'refresh': str(refresh),
+                    'access': str(refresh.access_token),
+                })
     except Exception as e:
-        print(e)
-        return JsonResponse({'status': 'Error'})
-    
-    refresh = RefreshToken.for_user(user)
-    
-    return JsonResponse({
-                'refresh': str(refresh),
-                'access': str(refresh.access_token),
-            })
+        import traceback
+        traceback.print_exc()
+        return JsonResponse({'status': 'Error', 'message': str(e)}, status=500)
+            
             
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])

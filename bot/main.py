@@ -15,7 +15,8 @@ django.setup()
 
 import asyncio
 from aiogram import Bot, Dispatcher
-from handlers import user
+from handlers.handlers import user
+from middlewares.i18n import i18n_middleware
 
 
 
@@ -27,7 +28,9 @@ async def main():
     bot = Bot(token=TOKEN_TG)
     
     dp = Dispatcher()
+    
     dp.include_router(user)
+    i18n_middleware.setup(dp)
     
     await dp.start_polling(bot)
     

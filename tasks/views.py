@@ -1,5 +1,7 @@
 from django.shortcuts import render
 from rest_framework import status
+from django.utils import timezone
+from django.core.exceptions import ValidationError
 
 # Create your views here.
 from tasks.models import Task
@@ -20,8 +22,11 @@ class TasksAPIView(APIView): # Using APIView instead of ListCreateAPIView to und
         
         target_date = request.query_params.get('date')
         
-        if target_date is not None:
-            instances = instances.filter(date=target_date)
+        if target_date: 
+            try:
+                instances = instances.filter(date=target_date)
+            except ValidationError:
+                instances = instances.none()
             
         serialazier_class = TaskSerialazier(instances, many=True)
         
