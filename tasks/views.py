@@ -22,6 +22,9 @@ class TasksAPIView(APIView): # Using APIView instead of ListCreateAPIView to und
         
         target_date = request.query_params.get('date')
         
+        if target_date=='':
+            return Response([], status=status.HTTP_200_OK)
+        
         if target_date: 
             try:
                 instances = instances.filter(date=target_date)

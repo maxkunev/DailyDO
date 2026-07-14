@@ -187,3 +187,11 @@ msgstr ""
 "\n"
 "✨ Created by <b>@Innocento00</b>\n"
 "For any questions or suggestions, feel free to contact me."
+
+# Scheduler
+
+msgid "🌤 Your tasks for today"
+msgstr "🌤 Your tasks for today"
+
+msgid "😞 You didn't finish these tasks today"
+msgstr "😞 You didn't finish these tasks today"

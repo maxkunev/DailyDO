@@ -1,11 +1,14 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useLayoutEffect } from 'react'
 import './App.css'
-import { GripVertical, Pencil, Trash2 } from 'lucide-react'
+import { GripVertical, Pencil, Trash2, ChevronDown, ArrowLeft } from 'lucide-react'
 import { Plus } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 function App() {
 
   const API = import.meta.env.VITE_API_URL
+
+  const { t, i18n } = useTranslation()
 
   const [tasks, setTasks] = useState([])
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -33,6 +36,11 @@ function App() {
 
   const initStartedRef = useRef(false)
 
+  const [detailsTask, setDetailsTask] = useState(null)
+
+  const [hasOverflowMap, setHasOverflowMap] = useState({})
+  const taskTextRefs = useRef({})
+
   useEffect(() => {
     if (initStartedRef.current) return
     initStartedRef.current = true
@@ -44,7 +52,40 @@ function App() {
       fetchTasks()
     }
   }, [selectedDate, isAuthenticated])
+
+  useLayoutEffect(() => {
+    checkTaskOverflow()
+  }, [tasks])
+
+  useEffect(() => {
+    const handleResize = () => checkTaskOverflow()
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
   
+  useEffect(() => {
+    const isAnyOverlayOpen =
+      showAllTasksModal || showAddForm || !!deleteTarget || !!detailsTask
+
+    if (isAnyOverlayOpen) {
+      const scrollY = window.scrollY
+      document.body.style.position = 'fixed'
+      document.body.style.top = `-${scrollY}px`
+      document.body.style.left = '0'
+      document.body.style.right = '0'
+      document.body.style.overflow = 'hidden'
+      document.body.dataset.scrollY = scrollY
+    } else {
+      const scrollY = document.body.dataset.scrollY || '0'
+      document.body.style.position = ''
+      document.body.style.top = ''
+      document.body.style.left = ''
+      document.body.style.right = ''
+      document.body.style.overflow = ''
+      window.scrollTo(0, parseInt(scrollY, 10))
+    }
+  }, [showAllTasksModal, showAddForm, deleteTarget, detailsTask])
+
   const getAccessToken = () => localStorage.getItem('access_token')
   const getRefreshToken = () => localStorage.getItem('refresh_token')
 
@@ -166,6 +207,29 @@ function App() {
     }
   }
 
+  const setTaskTextRef = (taskId, el) => {
+  if (el) {
+    taskTextRefs.current[taskId] = el
+  } else {
+    delete taskTextRefs.current[taskId]
+  }
+}
+
+  const checkTaskOverflow = () => {
+    const next = {}
+
+    Object.entries(taskTextRefs.current).forEach(([taskId, el]) => {
+      if (!el) return
+
+      const hasVerticalOverflow = el.scrollHeight > el.clientHeight + 1
+      const hasHorizontalOverflow = el.scrollWidth > el.clientWidth + 1
+
+      next[taskId] = hasVerticalOverflow || hasHorizontalOverflow
+    })
+
+    setHasOverflowMap(next)
+  }
+
   const initializeApp = async () => {
     try {
       const tg = window.Telegram?.WebApp
@@ -205,6 +269,11 @@ function App() {
 
       const meData = await meResponse.json()
       setMe(meData)
+      if (['en', 'ru', 'uk'].includes(meData.language)) {
+        await i18n.changeLanguage(meData.language)
+      } else {
+        await i18n.changeLanguage('en')
+      }
       setIsAuthenticated(true)
     } catch (error) {
       clearTokens()
@@ -213,6 +282,14 @@ function App() {
       console.error('Auth error:', error)
     }
   }
+  const openTaskDetails = (task) => {
+    setDetailsTask(task)
+  }
+
+  const closeTaskDetails = () => {
+    setDetailsTask(null)
+  }
+
 
   const fetchTasks = async () => {
     setIsLoading(true)
@@ -288,6 +365,9 @@ function App() {
       text: '',
       date: selectedDate,
     })
+  }
+  const goHome = () => {
+    setShowAllTasksModal(false)
   }
 
   const handleTaskSubmit = async (e) => {
@@ -417,7 +497,7 @@ function App() {
 
       setTaskErrors((prev) => ({
         ...prev,
-        [task.id]: 'Could not update status',
+        [task.id]: t('couldNotUpdateStatus'),
       }))
 
       setTimeout(() => {
@@ -470,7 +550,7 @@ function App() {
 
       setTaskErrors((prev) => ({
         ...prev,
-        [task.id]: 'Could not delete task',
+        [task.id]: t('couldNotDeleteTask'),
       }))
 
       setTimeout(() => {
@@ -520,7 +600,12 @@ function App() {
     <div className="app-container">
 
       <section className="title-block">
-        <h1>My tasks</h1>
+        <h1
+          className="title-clickable"
+          onClick={goHome}
+        >
+          {t('myTasks')}
+        </h1>
         <div className="user-chip" onClick={openAllTasksModal} role="button" tabIndex={0}>
           <img
             className="user-avatar"
@@ -528,7 +613,7 @@ function App() {
             alt={me?.username ? `${me.username} avatar` : 'User avatar'}
           />
           <span className="user-name">
-            {me?.username || 'guest'}
+            {me?.username || t('guest')}
           </span>
         </div>
       </section>
@@ -558,7 +643,7 @@ function App() {
 
       <section className="tasks-block">
         {!isAuthenticated ? (
-          <p className="loading-text">Checking telegram auth...</p>
+          <p className="loading-text">{t('checkingTelegramAuth')}</p>
         ) : isLoading ? (
           <div className="spinner-container">
             <div className="spinner"></div>
@@ -566,37 +651,54 @@ function App() {
         ) : (
           <>
             <div className="tasks-head">
-              <span className="tasks-head-label tasks-head-left">Tasks</span>
-              <span className="tasks-head-label tasks-head-right">Status</span>
+              <span className="tasks-head-label tasks-head-left">{t('tasks')}</span>
+              <span className="tasks-head-label tasks-head-right">{t('status')}</span>
             </div>
             <ul className="task-list">
               {tasks.length === 0 ? (
-                <li className="task-item empty">You do not have tasks on this day</li>
+                <li className="task-item empty">{t('noTasksForDay')}</li>
               ) : (
                 tasks.map((task) => (
                   <li key={task.id} className="task-item">
                     <div className="task-content">
-                        <div className="task-text-block">
-                          <span className="task-text">{task.text}</span>
-                          {taskErrors[task.id] && (
-                            <span className="task-error-text">{taskErrors[task.id]}</span>
-                          )}
-                        </div>
+                      <div className={`task-text-block ${hasOverflowMap[task.id] ? 'has-expand' : ''}`}>
+                        <span
+                          ref={(el) => setTaskTextRef(task.id, el)}
+                          className="task-text"
+                        >
+                          {task.text}
+                        </span>
 
-                      <button
-                        className="icon-btn edit-btn"
-                        type="button"
-                        aria-label="Edit task"
-                        onClick={() => openEditForm(task)}
-                      >
-                        <Pencil size={18} strokeWidth={2.2} />
-                      </button>
-                    </div>
+                        {hasOverflowMap[task.id] ? (
+                          <button
+                            type="button"
+                            className="task-overlay-toggle"
+                            aria-label={t('openTaskDetails')}
+                            onClick={() => openTaskDetails(task)}
+                          >
+                            <ChevronDown size={20} strokeWidth={3} />
+                          </button>
+                        ) : null}
+
+                        {taskErrors[task.id] && (
+                          <span className="task-error-text">{taskErrors[task.id]}</span>
+                        )}
+                      </div>
+
+                        <button
+                          className="icon-btn edit-btn"
+                          type="button"
+                          aria-label={t('editTaskAria')}
+                          onClick={() => openEditForm(task)}
+                        >
+                          <Pencil size={18} strokeWidth={2.2} />
+                        </button>
+                      </div>
 
                     <button
                       className={`done-btn ${task.is_done ? 'is-done' : ''}`}
                       type="button"
-                      aria-label={task.is_done ? 'Task completed' : 'Mark as done'}
+                      aria-label={task.is_done ? t('taskCompleted') : t('markAsDone')}
                       onClick={() => handleToggleDone(task)}
                     >
                       {task.is_done && <span>✓</span>}
@@ -605,7 +707,7 @@ function App() {
                     <button
                       className="icon-btn delete-btn"
                       type="button"
-                      aria-label="Delete task"
+                      aria-label={t('deleteTask')}
                       onClick={() => openDeleteConfirm(task)}
                     >
                       <Trash2 size={20} strokeWidth={2.3} />
@@ -617,17 +719,54 @@ function App() {
             </>
           )}
         </section>
+        {detailsTask && (
+          <div className="modal-overlay" onClick={closeTaskDetails}>
+            <div className="task-modal task-details-modal" onClick={(e) => e.stopPropagation()}>
+              <div className="task-modal-header">
+                <span className="task-modal-header-side" aria-hidden="true" />
+                <div className="task-modal-header single">
+                  <h2 className="task-modal-title">{t('taskDetails')}</h2>
+                </div>
+              </div>
+              <div className="task-details-content-wrap">
+                <div className="task-details-content">
+                  <p className="task-details-text">{detailsTask.text}</p>
+                </div>
+              </div>
+              <div className="task-details-footer">
+                <button
+                  type="button"
+                  className="task-form-cancel task-details-close-btn"
+                  onClick={closeTaskDetails}
+                >
+                  {t('close')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {showAllTasksModal && (
-          <div className="modal-overlay" onClick={closeAllTasksModal}>
-            <div className="task-modal all-tasks-modal" onClick={(e) => e.stopPropagation()}>
-              <h2>All tasks</h2>
+          <div className="all-tasks-page" onClick={closeAllTasksModal}>
+            <div className="all-tasks-page-content" onClick={(e) => e.stopPropagation()}>
+              <div className="all-tasks-header">
+                <button
+                  type="button"
+                  className="all-tasks-back-btn"
+                  aria-label={t('close')}
+                  onClick={closeAllTasksModal}
+                >
+                  <ArrowLeft size={22} strokeWidth={2.3} />
+                </button>
 
+                <h2 className='alltasks-text-arrow'>{t('allTasks')}</h2>
+                <span aria-hidden="true"></span>
+              </div>
               {isAllTasksLoading ? (
                 <div className="spinner-container">
                   <div className="spinner"></div>
                 </div>
               ) : allTasks.length === 0 ? (
-                <p className="loading-text">No tasks yet</p>
+                <p className="loading-text">{t('noTasksYet')}</p>
               ) : (
                 <div className="all-tasks-groups">
                   {sortedDates.map((dateKey) => (
@@ -644,27 +783,44 @@ function App() {
                         {groupedTasks[dateKey].map((task) => (
                           <li key={task.id} className="task-item">
                             <div className="task-content">
-                              <div className="task-text-block">
-                                <span className="task-text">{task.text}</span>
+                              <div className={`task-text-block ${hasOverflowMap[task.id] ? 'has-expand' : ''}`}>
+                                <span
+                                  ref={(el) => setTaskTextRef(task.id, el)}
+                                  className="task-text"
+                                >
+                                  {task.text}
+                                </span>
+
+                                {hasOverflowMap[task.id] ? (
+                                  <button
+                                    type="button"
+                                    className="task-overlay-toggle"
+                                    aria-label={t('openTaskDetails')}
+                                    onClick={() => openTaskDetails(task)}
+                                  >
+                                    <ChevronDown size={20} strokeWidth={3} />
+                                  </button>
+                                ) : null}
+
                                 {taskErrors[task.id] && (
                                   <span className="task-error-text">{taskErrors[task.id]}</span>
                                 )}
                               </div>
 
-                              <button
-                                className="icon-btn edit-btn"
-                                type="button"
-                                aria-label="Edit task"
-                                onClick={() => openEditForm(task)}
-                              >
-                                <Pencil size={18} strokeWidth={2.2} />
-                              </button>
-                            </div>
+                                <button
+                                  className="icon-btn edit-btn"
+                                  type="button"
+                                  aria-label={t('editTaskAria')}
+                                  onClick={() => openEditForm(task)}
+                                >
+                                  <Pencil size={18} strokeWidth={2.2} />
+                                </button>
+                              </div>
 
                             <button
                               className={`done-btn ${task.is_done ? 'is-done' : ''}`}
                               type="button"
-                              aria-label={task.is_done ? 'Task completed' : 'Mark as done'}
+                              aria-label={task.is_done ? t('taskCompleted') : t('markAsDone')}
                               onClick={() => handleToggleDone(task)}
                             >
                               {task.is_done && <span>✓</span>}
@@ -673,7 +829,7 @@ function App() {
                             <button
                               className="icon-btn delete-btn"
                               type="button"
-                              aria-label="Delete task"
+                              aria-label={t('deleteTask')}
                               onClick={() => openDeleteConfirm(task)}
                             >
                               <Trash2 size={20} strokeWidth={2.3} />
@@ -685,34 +841,29 @@ function App() {
                   ))}
                 </div>
               )}
-
-              <div className="task-form-actions">
-                <button
-                  type="button"
-                  className="task-form-cancel"
-                  onClick={closeAllTasksModal}
-                >
-                  Close
-                </button>
-              </div>
             </div>
           </div>
         )}
         {showAddForm && (
           <div className="modal-overlay" onClick={() => closeTaskForm()}>
             <div className="task-modal" onClick={(e) => e.stopPropagation()}>
-              <h2>{editingTaskId ? 'Edit task' : 'Add task'}</h2>
+              <h2>{editingTaskId ? t('editTask') : t('addTask')}</h2>
 
               <form onSubmit={handleTaskSubmit} className="task-form">
-                <input
-                  type="text"
-                  placeholder="Task text"
-                  value={newTask.text}
-                  onChange={(e) =>
-                    setNewTask((prev) => ({ ...prev, text: e.target.value }))
-                  }
-                  required
-                />
+              <input
+                type="text"
+                placeholder={t('taskText')}
+                value={newTask.text}
+                maxLength={300}
+                onChange={(e) =>
+                  setNewTask((prev) => ({ ...prev, text: e.target.value }))
+                }
+                required
+              />
+
+              <div className={`task-char-counter ${newTask.text.length >= 270 ? 'is-near-limit' : ''}`}>
+                {300 - newTask.text.length} {t('symbolsleft')}
+              </div>
 
                 <input
                   type="date"
@@ -729,7 +880,7 @@ function App() {
                     className="task-form-cancel"
                     onClick={() => closeTaskForm()}
                   >
-                    Cancel
+                    {t('cancel')}
                   </button>
 
                   <button
@@ -739,11 +890,11 @@ function App() {
                   >
                     {isSubmitting
                       ? editingTaskId
-                        ? 'Saving...'
-                        : 'Creating...'
+                        ? t('saving')
+                        : t('creating')
                       : editingTaskId
-                        ? 'Save changes'
-                        : 'Save'}
+                        ? t('saveChanges')
+                        : t('save')}
                   </button>
                 </div>
               </form>
@@ -753,10 +904,11 @@ function App() {
         {deleteTarget && (
           <div className="modal-overlay" onClick={closeDeleteConfirm}>
             <div className="task-modal delete-modal" onClick={(e) => e.stopPropagation()}>
-              <h2>Delete task?</h2>
-              <p className="delete-modal-text">
-                "{deleteTarget.text}"
-              </p>
+              <h2>{t('deleteTaskTitle')}</h2>
+
+              <div className="delete-modal-content">
+                <p className="delete-modal-text">{deleteTarget.text}</p>
+              </div>
 
               <div className="task-form-actions">
                 <button
@@ -765,7 +917,7 @@ function App() {
                   onClick={closeDeleteConfirm}
                   disabled={isDeleting}
                 >
-                  Cancel
+                  {t('cancel')}
                 </button>
 
                 <button
@@ -774,7 +926,7 @@ function App() {
                   onClick={handleDeleteTask}
                   disabled={isDeleting}
                 >
-                  {isDeleting ? 'Deleting...' : 'Delete'}
+                  {isDeleting ? t('deleting') : t('delete')}
                 </button>
               </div>
             </div>
@@ -787,8 +939,8 @@ function App() {
                 aria-label="Add task"
                 onClick={openAddForm}
               >
-                <Plus size={27} strokeWidth={2.7} />
-              <span className="floating-add-text">Add task</span>
+                <Plus size={18} strokeWidth={2.2} />
+              <span className="floating-add-text">{t('addTaskButton')}</span>
             </button>
           </div>
     </div>

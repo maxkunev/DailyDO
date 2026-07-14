@@ -1,4 +1,6 @@
+from datetime import datetime, timedelta, timezone
 import json
+from django.utils import timezone as d_timezone
 
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -30,7 +32,20 @@ def user_jwt_generator(request):
         if not validated_data:
             return JsonResponse({'status': 'invalid signature'}, status=401)
         
-        user_info_str = validated_data.get('user', {})
+        auth_date = validated_data.get('auth_date', {})
+        
+        if not auth_date:
+            return JsonResponse({'status': 'auth_date missing'}, status=401)
+        
+        try:
+            auth_date = datetime.fromtimestamp(int(auth_date), tz=timezone.utc)
+        except:
+            return JsonResponse({'status': 'invalid auth_date'}, status=401)
+        
+        if d_timezone.now() - auth_date > timedelta(minutes=60):
+            return JsonResponse({'status': 'InitData expired'}, status=401)
+        
+        user_info_str = validated_data.get('user', None)
         user_info = json.loads(user_info_str)
         
         try:
@@ -65,5 +80,6 @@ def get_user_info(request):
     return JsonResponse({
             'id':request.user.id,
             'username':request.user.username,
-            'first_name': request.user.first_name
+            'first_name': request.user.first_name,
+            'language': request.user.language
         })

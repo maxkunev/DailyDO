@@ -186,3 +186,11 @@ msgstr ""
 "\n"
 "✨ Создано <b>@Innocento00</b>\n"
 "По всем вопросам и предложениям пишите мне."
+
+# Scheduler
+
+msgid "🌤 Your tasks for today"
+msgstr "🌤 Ваши задачи на сегодня"
+
+msgid "😞 You didn't finish these tasks today"
+msgstr "😞 Ты сегодня не выполнил эти задания"
