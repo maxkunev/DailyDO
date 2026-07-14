@@ -5,12 +5,13 @@ from asgiref.sync import sync_to_async
 import json
 
 @sync_to_async
-def create_user_or_update(id, username, first_name):
+def create_user_or_update(id, username, first_name, chat_id):
     return TelegramUser.objects.update_or_create(
         id=id, 
         defaults={
             'username':username, 
-            'first_name':first_name
+            'first_name':first_name,
+            'chat_id':chat_id
             }
         )
 

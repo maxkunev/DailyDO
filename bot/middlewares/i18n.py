@@ -5,7 +5,7 @@ from aiogram.types import TelegramObject, Message, CallbackQuery
 from aiogram.utils.i18n import I18n
 from aiogram.utils.i18n.middleware import I18nMiddleware
 
-from services import get_user_language  
+from bot.services import get_user_language  
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 LOCALES_DIR = BASE_DIR / "locales"

@@ -45,7 +45,16 @@ services:
     depends_on:
       db:
         condition: service_healthy
-
+  scheduler:
+    build: .
+    networks:
+      - backend
+    command: python -m scheduler.main
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
   frontend:
     build: 
       context: ./frontend

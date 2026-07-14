@@ -30,7 +30,8 @@ async def command_start(message: Message, bot: Bot):
     obj, created = await create_user_or_update(
         message.from_user.id, 
         message.from_user.username, 
-        message.from_user.first_name     
+        message.from_user.first_name,
+        message.chat.id     
         )
     
     pinned_message = await message.answer(
@@ -268,7 +269,7 @@ async def process_tasks(callback: CallbackQuery, state: FSMContext):
     
     success = await paste_tasks(validated_tasks, callback.from_user.id)
     if success:
-        await callback.message.answer(_("Your tasks succesfully saved!"))
+        await callback.message.answer(_("Your tasks successfully saved!"))
     else:
         await callback.message.answer(_('Something went wrong. Try again later.'))
     
