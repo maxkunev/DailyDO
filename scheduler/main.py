@@ -30,15 +30,17 @@ async def main():
         'cron', 
         hour=7,
         minute=0,
-        timezone=ZoneInfo(os.getenv("TIMEZONE"))
+        timezone=ZoneInfo(os.getenv("TIMEZONE")),
+        misfire_grace_time=300
     )
 
     scheduler.add_job(
         proccess_tasks_evening, 
         'cron', 
         hour=20,
-        minute=00,
-        timezone=ZoneInfo(os.getenv("TIMEZONE"))
+        minute=0,
+        timezone=ZoneInfo(os.getenv("TIMEZONE")),
+        misfire_grace_time=300
     )
 
     scheduler.start()
