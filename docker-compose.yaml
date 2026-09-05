@@ -3,8 +3,6 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    ports: 
-      - "8000:8000"
     networks:
       - backend
     depends_on:
@@ -54,13 +52,33 @@ services:
       db:
         condition: service_healthy
   frontend:
+    networks:
+      - backend
     build: 
       context: ./frontend
       dockerfile: Dockerfile
       args:
         VITE_API_URL: ${VITE_API_URL}
+    depends_on:
+      - web
     ports:
-      - "5173:80"
+       - "80:80"
+       - "443:443"
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM;
+      while :; do 
+        certbot renew --webroot -w /var/www/certbot; 
+        sleep 12h;
+      done"
     
     
 networks:
@@ -68,3 +86,5 @@ networks:
 
 volumes:
   postgres_data_tg:
+  certbot_conf:
+  certbot_www:
