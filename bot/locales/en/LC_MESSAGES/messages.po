@@ -1,0 +1,197 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: mybot\n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+# Messages
+
+msgid "Choose the language you prefer:"
+msgstr "Choose the language you prefer:"
+
+msgid "Your language is now {language}"
+msgstr "Your language is now {language}"
+
+msgid "Something went wrong. Try again later."
+msgstr "Something went wrong. Try again later."
+
+msgid "Hello, {first_name} @{username}!"
+msgstr "Hello, {first_name} @{username}!"
+
+msgid "<b>📅 Your tasks</b>\n"
+msgstr "<b>📅 Your tasks</b>\n"
+
+msgid "📋 Collecting your tasks... Please wait..."
+msgstr "📋 Collecting your tasks... Please wait..."
+
+msgid "📭 You don't have any tasks yet."
+msgstr "📭 You don't have any tasks yet."
+ 
+msgid "Awaiting your tasks:"
+msgstr "Awaiting your tasks:"
+
+msgid "Command was cancelled."
+msgstr "Command was cancelled."
+
+msgid "What would you like to do next?"
+msgstr "What would you like to do next?"
+
+msgid "Are these tasks correct?\n\n{current_tasks}"
+msgstr "Are these tasks correct?\n\n{current_tasks}"
+
+msgid "Okay, send the tasks again:"
+msgstr "Okay, send the tasks again:"
+
+msgid "Please wait... Your tasks are being processed..."
+msgstr "Please wait... Your tasks are being processed..."
+
+msgid "Your tasks successfully saved!"
+msgstr "Your tasks successfully saved!"
+
+msgid "Sorry, I don't understand this command."
+msgstr "Sorry, I don't understand this command."
+
+msgid "Bot does not support this type of file."
+msgstr "Bot does not support this type of file."
+
+msgid "In the future, we will add support for processing voice recordings, text files, and photos."
+msgstr "In the future, we will add support for processing voice recordings, text files, and photos."
+
+# Commands
+
+msgid "My tasks"
+msgstr "My tasks"
+
+msgid "Create tasks"
+msgstr "Create tasks"
+
+msgid "Language"
+msgstr "Language"
+
+msgid "Save"
+msgstr "Save"
+
+msgid "Edit"
+msgstr "Edit"
+
+msgid "Tasks"
+msgstr "Tasks"
+
+msgid "Cancel"
+msgstr "Cancel"
+
+#guide
+
+msgid ""
+"✨ <b>How to Create Tasks</b>\n"
+"\n"
+"To help the AI understand your request correctly, please follow these guidelines:\n"
+"\n"
+"📅 <b>Dates</b>\n"
+"• You can include up to <b>5 different dates</b> in a single message.\n"
+"• If a task has <b>no date</b>, it will automatically be assigned to <b>today</b>.\n"
+"\n"
+"📝 <b>Best Practice</b>\n"
+"For the most accurate results, group tasks by date.\n"
+"\n"
+"<b>Example:</b>\n"
+"\n"
+"<b>Tomorrow:</b>\n"
+"• Buy groceries\n"
+"• Go to the gym\n"
+"\n"
+"<b>Friday:</b>\n"
+"• Finish the report\n"
+"• Call John\n"
+"\n"
+"This format helps the AI assign each task to the correct date.\n"
+"\n"
+"⚠️ <b>Current Limitations</b>\n"
+"• Don't ask the bot to <b>delete</b>, <b>move</b>, <b>edit</b>, or <b>complete</b> existing tasks.\n"
+"• The bot currently <b>only creates new tasks</b>.\n"
+"• If your message contains more than <b>5 different dates</b>, it may not be processed correctly.\n"
+"\n"
+"💡 <b>Tip</b>\n"
+"You can write naturally, just make sure each task has a clear date (or no date if it should be scheduled for today)."
+
+msgstr ""
+"✨ <b>How to Create Tasks</b>\n"
+"\n"
+"To help the AI understand your request correctly, please follow these guidelines:\n"
+"\n"
+"📅 <b>Dates</b>\n"
+"• You can include up to <b>5 different dates</b> in a single message.\n"
+"• If a task has <b>no date</b>, it will automatically be assigned to <b>today</b>.\n"
+"\n"
+"📝 <b>Best Practice</b>\n"
+"For the most accurate results, group tasks by date.\n"
+"\n"
+"<b>Example:</b>\n"
+"\n"
+"<b>Tomorrow:</b>\n"
+"• Buy groceries\n"
+"• Go to the gym\n"
+"\n"
+"<b>Friday:</b>\n"
+"• Finish the report\n"
+"• Call John\n"
+"\n"
+"This format helps the AI assign each task to the correct date.\n"
+"\n"
+"⚠️ <b>Current Limitations</b>\n"
+"• Don't ask the bot to <b>delete</b>, <b>move</b>, <b>edit</b>, or <b>complete</b> existing tasks.\n"
+"• The bot currently <b>only creates new tasks</b>.\n"
+"• If your message contains more than <b>5 different dates</b>, it may not be processed correctly.\n"
+"\n"
+"💡 <b>Tip</b>\n"
+"You can write naturally, just make sure each task has a clear date (or no date if it should be scheduled for today)."
+
+# start message
+
+msgid ""
+"👋 <b>Hello! I am DailyDO</b>\n"
+"\n"
+"DailyDO is your handy daily assistant 📅\n"
+"I will remind you of your tasks at any convenient time so you never forget anything.\n"
+"\n"
+"<b>What I can do:</b>\n"
+"• create tasks\n"
+"• remind you about them\n"
+"• populate tasks using AI\n"
+"\n"
+"<b>Why it's convenient:</b>\n"
+"• everything is in Telegram\n"
+"• simple interaction\n"
+"• graphical user interface\n"
+"\n"
+"✨ Created by me and <b>@Innocento00</b>\n"
+"For any questions or suggestions, feel free to contact me."
+msgstr ""
+"👋 <b>Hello! I am DailyDO</b>\n"
+"\n"
+"DailyDO is your handy daily assistant 📅\n"
+"I will remind you of your tasks at any convenient time so you never forget anything.\n"
+"\n"
+"<b>What I can do:</b>\n"
+"• create tasks\n"
+"• remind you about them\n"
+"• populate tasks using AI\n"
+"\n"
+"<b>Why it's convenient:</b>\n"
+"• everything is in Telegram\n"
+"• simple interaction\n"
+"• graphical user interface\n"
+"\n"
+"✨ Created by <b>@Innocento00</b>\n"
+"For any questions or suggestions, feel free to contact me."
+
+# Scheduler
+
+msgid "🌤 Your tasks for today"
+msgstr "🌤 Your tasks for today"
+
+msgid "😞 You didn't finish these tasks today"
+msgstr "😞 You didn't finish these tasks today"

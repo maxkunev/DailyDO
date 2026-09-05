@@ -1,0 +1,90 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    networks:
+      - backend
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - HOST_DB=db
+      - PORT_DB=5432
+  
+  db:
+    image: postgres:18
+    volumes:
+      - postgres_data_tg:/var/lib/postgresql
+    env_file:
+      - .env
+    environment:
+      - POSTGRES_DB=${NAME_DB}
+      - POSTGRES_USER=${USER_DB}
+      - POSTGRES_PASSWORD=${PASSWORD_DB}
+    networks:
+      - backend
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${USER_DB} -d ${NAME_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+  bot:
+    build: .
+    networks:
+      - backend
+    command: python bot/main.py
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+  scheduler:
+    build: .
+    networks:
+      - backend
+    command: python -m scheduler.main
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+  frontend:
+    networks:
+      - backend
+    build: 
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: ${VITE_API_URL}
+    depends_on:
+      - web
+    ports:
+       - "80:80"
+       - "443:443"
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot_conf:/etc/letsencrypt
+      - certbot_www:/var/www/certbot
+    entrypoint: >
+      sh -c "trap exit TERM;
+      while :; do 
+        certbot renew --webroot -w /var/www/certbot; 
+        sleep 12h;
+      done"
+    
+    
+networks:
+  backend:
+
+volumes:
+  postgres_data_tg:
+  certbot_conf:
+  certbot_www:
